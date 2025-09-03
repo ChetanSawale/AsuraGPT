@@ -330,7 +330,7 @@ export default function Home() {
                             title="Summarize this conversation"
                         >
                             {isSummarizing ? <LoaderIcon className="w-5 h-5" /> : <BookTextIcon className="w-5 h-5" />}
-                            <span className="hidden sm:inline">✨ Summarize</span>
+                            <span className="hidden sm:inline">✨ Summarizes</span>
                         </button>
                     </div>
                 )}

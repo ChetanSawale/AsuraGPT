@@ -13,6 +13,8 @@ const BookTextIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/
 const LoaderIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"> <path d="M21 12a9 9 0 1 1-6.219-8.56" /> </svg> );
 const ChevronLeftIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg> );
 const LogOutIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> );
+const CopyIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> );
+const CheckIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> );
 
 // --- Simple ID Generator (replaces uuid) for message keys ---
 const uuidv4 = () => `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -53,6 +55,8 @@ export default function Home() {
     const [isSummarizing, setIsSummarizing] = useState(false);
     const [isLoadingHistory, setIsLoadingHistory] = useState(true); 
     const [isCreatingChat, setIsCreatingChat] = useState(false); 
+    const [copiedMessageId, setCopiedMessageId] = useState(null);
+    const [showLoginPopup, setShowLoginPopup] = useState(false); // State for login modal
 
     const messagesEndRef = useRef(null);
     const socketRef = useRef(null);
@@ -62,7 +66,7 @@ export default function Home() {
         if (isCreatingChat) return;
         setIsCreatingChat(true);
         try {
-            const response = await axios.post("http://localhost:3000/api/chat", 
+            const response = await axios.post("https://asuragpt-2.onrender.com/api/chat", 
                 { title: "New Conversation" },
                 { withCredentials: true } 
             );
@@ -79,13 +83,9 @@ export default function Home() {
 
     useEffect(() => {
         const fetchInitialData = async () => {
-            // Since there is no /profile endpoint, we cannot fetch the user's email.
-            // This part of the code has been removed.
-
-            // Fetch chat history
             setIsLoadingHistory(true);
             try {
-                const response = await axios.get("http://localhost:3000/api/chat", {
+                const response = await axios.get("https://asuragpt-2.onrender.com/api/chat", {
                     withCredentials: true,
                 });
                 const chatsFromServer = response.data.chats;
@@ -104,6 +104,10 @@ export default function Home() {
                 }
             } catch (error) {
                 console.error("❌ Error fetching chat history:", error);
+                // Check for authentication error (e.g., 401 Unauthorized)
+                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                    setShowLoginPopup(true);
+                }
             } finally {
                 setIsLoadingHistory(false);
             }
@@ -117,7 +121,10 @@ export default function Home() {
     }, [handleNewChat]); 
 
     useEffect(() => {
-        socketRef.current = io("http://localhost:3000", {
+        // Only initialize socket if user is authenticated
+        if (showLoginPopup) return;
+
+        socketRef.current = io("https://asuragpt-2.onrender.com", {
             transports: ["websocket"],
             withCredentials: true,
         });
@@ -157,11 +164,13 @@ export default function Home() {
         socket.on("ai-summary", handleAiSummary);
         socket.on("disconnect", () => console.log("⚠️ Socket disconnected"));
         return () => {
-            socket.off("ai-message", handleAiMessage);
-            socket.off("ai-summary", handleAiSummary);
-            socket.disconnect();
+            if (socket) {
+                socket.off("ai-message", handleAiMessage);
+                socket.off("ai-summary", handleAiSummary);
+                socket.disconnect();
+            }
         };
-    }, []);
+    }, [showLoginPopup]);
 
     useEffect(() => {
         if (chatHistory.length > 0 && !activeChatId) {
@@ -175,10 +184,23 @@ export default function Home() {
     }, [chatHistory, activeChatId]);
 
     const handleLogout = () => {
-        // The proper way to logout is to hit a backend endpoint that clears the session/cookie.
-        // Since one doesn't exist in the provided routes, we will just redirect to the login page.
         console.log("Redirecting to login page.");
         window.location.href = '/login'; 
+    };
+
+    const handleCopy = (text, messageId) => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            setCopiedMessageId(messageId);
+            setTimeout(() => setCopiedMessageId(null), 2000); // Reset after 2 seconds
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
+        }
+        document.body.removeChild(textArea);
     };
 
     const sendMessage = async () => {
@@ -189,7 +211,7 @@ export default function Home() {
         if (chatIdForSocket === null) {
             try {
                 const chatTitle = message.length > 30 ? message.substring(0, 27) + "..." : message;
-                const response = await axios.post("http://localhost:3000/api/chat", { title: chatTitle }, { withCredentials: true });
+                const response = await axios.post("https://asuragpt-2.onrender.com/api/chat", { title: chatTitle }, { withCredentials: true });
                 const newChatFromDB = response.data.chat;
                 const newChatForState = { ...newChatFromDB, id: newChatFromDB.id || newChatFromDB._id, messages: [userMessage] };
                 setChatHistory((prev) => [newChatForState, ...prev]);
@@ -231,6 +253,22 @@ export default function Home() {
     
     return (
         <div className="font-sans antialiased text-white bg-black h-screen w-screen flex overflow-hidden">
+            
+            {showLoginPopup && (
+                <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                    <div className="bg-zinc-800 p-8 rounded-lg shadow-xl text-center">
+                        <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+                        <p className="text-gray-400 mb-6">Please log in to continue to your chat session.</p>
+                        <button
+                            onClick={() => window.location.href = '/login'}
+                            className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition-colors"
+                        >
+                            Go to Login
+                        </button>
+                    </div>
+                </div>
+            )}
+
             <div className={`bg-black backdrop-blur-md border-r border-gray-800 flex flex-col transition-all duration-300 ${isSidebarOpen ? "w-64" : "w-0"} overflow-hidden`}>
                 <div className="flex items-center justify-between p-4 border-b border-gray-800 flex-shrink-0">
                     <h2 className="font-semibold whitespace-nowrap">Chat History</h2>
@@ -273,7 +311,7 @@ export default function Home() {
                 </div>
             </div>
 
-            <div className="flex-1 flex flex-col relative bg-black">
+            <div className="flex-1 flex flex-col relative bg-gray-950">
                 <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
                     <button
                         onClick={() => setSidebarOpen(!isSidebarOpen)}
@@ -303,7 +341,7 @@ export default function Home() {
                             {activeChat.messages && activeChat.messages.map((msg) => (
                                 <div
                                     key={msg.id}
-                                    className={`flex items-start gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                                    className={`group flex items-center gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                                 >
                                     {msg.role === "model" && (
                                         <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center shrink-0">
@@ -322,6 +360,19 @@ export default function Home() {
                                             <UserIcon className="w-5 h-5" />
                                         </div>
                                     )}
+                                    {msg.role === 'model' && (
+                                        <button 
+                                            onClick={() => handleCopy(msg.content, msg.id)}
+                                            className="p-2 text-gray-500 hover:text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                                            title="Copy message"
+                                        >
+                                            {copiedMessageId === msg.id ? (
+                                                <CheckIcon className="w-4 h-4 text-green-500" />
+                                            ) : (
+                                                <CopyIcon className="w-4 h-4" />
+                                            )}
+                                        </button>
+                                    )}
                                 </div>
                             ))}
                             <div ref={messagesEndRef} />
@@ -335,7 +386,7 @@ export default function Home() {
                                 Gemini Chat
                             </h1>
                             <p className="mt-3 text-base md:text-lg text-gray-500 max-w-xl mx-auto">
-                                {isLoadingHistory ? "Loading your conversations..." : "Select a chat or start a new one."}
+                                {isLoadingHistory ? "Authenticating..." : "Select a chat or start a new one."}
                             </p>
                         </div>
                         <TextBox message={message} setMessage={setMessage} sendMessage={sendMessage} />

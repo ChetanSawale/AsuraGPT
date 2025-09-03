@@ -1,6 +1,7 @@
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
+const path = require('path')
 
 const authRoutes = require('./routes/auth.route');
 const chatRoutes = require('./routes/chat.route');
@@ -16,9 +17,14 @@ app.use(cors({
   origin: "http://localhost:5173", // React frontend URL
   credentials: true, // allow cookies/auth headers
 }));
+app.use(express.static(path.join(__dirname, '../public')))
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
+
+app.get("*name", (req,res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 module.exports = app;

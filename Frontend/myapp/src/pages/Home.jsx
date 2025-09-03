@@ -16,6 +16,8 @@ const LogOutIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/sv
 const CopyIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> );
 const CheckIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> );
 
+const API_BASE_URL = "https://asuragpt-2.onrender.com"; // Centralized API URL
+
 // --- Simple ID Generator (replaces uuid) for message keys ---
 const uuidv4 = () => `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -56,7 +58,7 @@ export default function Home() {
     const [isLoadingHistory, setIsLoadingHistory] = useState(true); 
     const [isCreatingChat, setIsCreatingChat] = useState(false); 
     const [copiedMessageId, setCopiedMessageId] = useState(null);
-    const [showLoginPopup, setShowLoginPopup] = useState(false); // State for login modal
+    const [showLoginPopup, setShowLoginPopup] = useState(false);
 
     const messagesEndRef = useRef(null);
     const socketRef = useRef(null);
@@ -66,7 +68,7 @@ export default function Home() {
         if (isCreatingChat) return;
         setIsCreatingChat(true);
         try {
-            const response = await axios.post("https://asuragpt-2.onrender.com/api/chat", 
+            const response = await axios.post(`${API_BASE_URL}/api/chat`, 
                 { title: "New Conversation" },
                 { withCredentials: true } 
             );
@@ -85,7 +87,7 @@ export default function Home() {
         const fetchInitialData = async () => {
             setIsLoadingHistory(true);
             try {
-                const response = await axios.get("https://asuragpt-2.onrender.com/api/chat", {
+                const response = await axios.get(`${API_BASE_URL}/api/chat`, {
                     withCredentials: true,
                 });
                 const chatsFromServer = response.data.chats;
@@ -104,7 +106,6 @@ export default function Home() {
                 }
             } catch (error) {
                 console.error("❌ Error fetching chat history:", error);
-                // Check for authentication error (e.g., 401 Unauthorized)
                 if (error.response && (error.response.status === 401 || error.response.status === 403)) {
                     setShowLoginPopup(true);
                 }
@@ -121,10 +122,9 @@ export default function Home() {
     }, [handleNewChat]); 
 
     useEffect(() => {
-        // Only initialize socket if user is authenticated
         if (showLoginPopup) return;
 
-        socketRef.current = io("https://asuragpt-2.onrender.com", {
+        socketRef.current = io(API_BASE_URL, {
             transports: ["websocket"],
             withCredentials: true,
         });
@@ -196,7 +196,7 @@ export default function Home() {
         try {
             document.execCommand('copy');
             setCopiedMessageId(messageId);
-            setTimeout(() => setCopiedMessageId(null), 2000); // Reset after 2 seconds
+            setTimeout(() => setCopiedMessageId(null), 2000);
         } catch (err) {
             console.error('Failed to copy text: ', err);
         }
@@ -211,7 +211,7 @@ export default function Home() {
         if (chatIdForSocket === null) {
             try {
                 const chatTitle = message.length > 30 ? message.substring(0, 27) + "..." : message;
-                const response = await axios.post("https://asuragpt-2.onrender.com/api/chat", { title: chatTitle }, { withCredentials: true });
+                const response = await axios.post(`${API_BASE_URL}/api/chat`, { title: chatTitle }, { withCredentials: true });
                 const newChatFromDB = response.data.chat;
                 const newChatForState = { ...newChatFromDB, id: newChatFromDB.id || newChatFromDB._id, messages: [userMessage] };
                 setChatHistory((prev) => [newChatForState, ...prev]);

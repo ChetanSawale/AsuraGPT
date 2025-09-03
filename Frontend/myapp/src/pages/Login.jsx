@@ -21,7 +21,7 @@ export default function Login() {
     setError("");
     try {
       // Use axios directly with the full URL and configuration
-      await axios.post("http://localhost:3000/api/auth/login", form, {
+      await axios.post("https://asuragpt-2.onrender.com/api/auth/login", form, {
           withCredentials: true 
       });
       // Use window.location.href for navigation
@@ -41,7 +41,7 @@ export default function Login() {
                 <BotIcon className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold">Welcome Back</h1>
-            <p className="text-gray-400">Log in to continue your conversations</p>
+            <p className="text-gray-400">Log in to continue your converstions</p>
         </div>
 
         <form

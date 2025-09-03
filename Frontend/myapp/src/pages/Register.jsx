@@ -9,7 +9,8 @@ export default function Register() {
     firstname: "",
     lastname: "",
     email: "",
-    password: ""
+    password: "",
+    confirmPassword: "" // Added for confirmation
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,10 +21,15 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Password confirmation check
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     setIsLoading(true);
     setError("");
     try {
-      await axios.post("http://localhost:3000/api/auth/register", {
+      await axios.post("https://asuragpt-2.onrender.com/api/auth/register", {
         fullname: {
           firstname: form.firstname,
           lastname: form.lastname,
@@ -37,7 +43,7 @@ export default function Register() {
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -48,8 +54,8 @@ export default function Register() {
             <div className="inline-block bg-indigo-600 p-3 rounded-full mb-2">
                 <BotIcon className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-3xl font-bold">Create an Account</h1>
-            <p className="text-gray-400">Start your journey with us</p>
+            <h1 className="text-3xl font-bold tracking-tight">Create an Account</h1>
+            <p className="text-gray-400">Join the community and start chatting</p>
         </div>
 
         <form
@@ -58,8 +64,8 @@ export default function Register() {
         >
           {error && <p className="bg-red-500/20 text-red-400 text-sm p-3 rounded-md mb-4 text-center">{error}</p>}
           
-          <div className="flex gap-4 mb-4">
-            <div className="w-1/2">
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <div className="w-full sm:w-1/2">
                 <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="firstname">First Name</label>
                 <input
                 type="text"
@@ -71,7 +77,7 @@ export default function Register() {
                 required
                 />
             </div>
-            <div className="w-1/2">
+            <div className="w-full sm:w-1/2">
                 <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="lastname">Last Name</label>
                 <input
                 type="text"
@@ -98,7 +104,7 @@ export default function Register() {
             />
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4">
             <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="password">Password</label>
             <input
               type="password"
@@ -111,12 +117,25 @@ export default function Register() {
             />
           </div>
 
+           <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-400 mb-2" htmlFor="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              name="confirmPassword"
+              id="confirmPassword"
+              placeholder="••••••••"
+              onChange={handleChange}
+              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              required
+            />
+          </div>
+
           <button
             type="submit"
             disabled={isLoading}
             className="w-full bg-gradient-to-r from-indigo-500 to-blue-500 text-white py-3 rounded-md hover:opacity-90 transition-opacity font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "Creating Account..." : "Register"}
+            {isLoading ? "Creating Account..." : "Create Account"}
           </button>
 
           <p className="text-center text-sm text-gray-400 mt-6">
@@ -133,3 +152,4 @@ export default function Register() {
     </div>
   );
 }
+

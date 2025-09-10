@@ -13,13 +13,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Enable CORS so frontend can call API
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://asuragpt-1.onrender.com"
+];
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",            // Local dev
-    "https://asuragpt-1.onrender.com"   // Render frontend
-  ],
+  origin: (origin, callback) => {
+    // allow requests with no origin (like mobile apps, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("CORS not allowed for this origin: " + origin), false);
+    }
+  },
   credentials: true,
 }));
+
 app.use(express.static(path.join(__dirname, '../public')))
 
 // Routes

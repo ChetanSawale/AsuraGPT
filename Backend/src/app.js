@@ -14,8 +14,11 @@ app.use(cookieParser());
 
 // Enable CORS so frontend can call API
 app.use(cors({
-  origin: "http://localhost:5173", // React frontend URL
-  credentials: true, // allow cookies/auth headers
+  origin: [
+    "http://localhost:5173",            // Local dev
+    "https://asuragpt-1.onrender.com"   // Render frontend
+  ],
+  credentials: true,
 }));
 app.use(express.static(path.join(__dirname, '../public')))
 

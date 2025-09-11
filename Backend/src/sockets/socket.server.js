@@ -12,10 +12,14 @@ function initsocketserver(httpServer){
 
     const io = new Server(httpServer, {
     cors: {
-        origin: "http://localhost:5173", 
-        methods: ["GET", "POST"],
-        credentials: true
+      origin: [
+        "http://localhost:5173",
+        "https://asuragpt-2.onrender.com"
+      ],
+      methods: ["GET", "POST"],
+      credentials: true
     }
+
     });
 
 
@@ -61,7 +65,7 @@ io.on("connection", (socket) => {
 
     await creatememoryVector({
       vectors,
-      messageId: message._id.toString(),  // ✅ dynamic
+      messageId: message._id.toString(),  
       metadata: {
         chat: messagePayload.chat,
         user: socket.user._id,
@@ -113,7 +117,7 @@ io.on("connection", (socket) => {
 
     await creatememoryVector({
       vectors: responseVectors,
-      messageId: messageResponse._id.toString(), // ✅ dynamic
+      messageId: messageResponse._id.toString(),
       metadata: {
         chat: messagePayload.chat,
         user: socket.user._id,
@@ -121,7 +125,6 @@ io.on("connection", (socket) => {
       }
     });
 
-    // Broadcast to everyone in this chat room
     io.to(messagePayload.chat).emit("ai-message", {
       content: response,
       chat: messagePayload.chat,

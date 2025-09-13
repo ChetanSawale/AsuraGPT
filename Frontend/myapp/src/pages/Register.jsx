@@ -29,7 +29,7 @@ export default function Register() {
     setIsLoading(true);
     setError("");
     try {
-      await axios.post("https://asuragpt-1.onrender.com/api/auth/register", {
+      await axios.post("https://asuragpt-2.onrender.com/api/auth/register", {
         fullname: {
           firstname: form.firstname,
           lastname: form.lastname,

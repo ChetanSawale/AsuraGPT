@@ -15,7 +15,7 @@ app.use(cookieParser());
 // Enable CORS so frontend can call API
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://asuragpt-1.onrender.com"
+  "https://asuragpt-2.onrender.com"
 ];
 
 app.use(cors({

@@ -1,8 +1,13 @@
-import axios from "axios";
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://asuragpt-1.onrender.com';
 
 const API = axios.create({
-  baseURL: "https://asuragpt-1.onrender.com/api",
-  withCredentials: true, // allows cookies/session tokens
+    baseURL: API_BASE_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json'
+    }
 });
 
 export default API;

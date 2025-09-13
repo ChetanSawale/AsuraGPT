@@ -21,7 +21,7 @@ export default function Login() {
     setError("");
     try {
       // Use axios directly with the full URL and configuration
-      await axios.post("https://asuragpt-2.onrender.com/api/auth/login", form, {
+      await axios.post("https://asuragpt-1.onrender.com/api/auth/login", form, {
           withCredentials: true 
       });
       // Use window.location.href for navigation

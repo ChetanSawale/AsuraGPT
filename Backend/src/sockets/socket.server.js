@@ -14,7 +14,7 @@ function initsocketserver(httpServer){
     cors: {
       origin: [
         "http://localhost:5173",
-        "https://asuragpt-2.onrender.com"
+        "https://asuragpt-1.onrender.com"
       ],
       methods: ["GET", "POST"],
       credentials: true

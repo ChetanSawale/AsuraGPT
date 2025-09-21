@@ -150,7 +150,7 @@ const WelcomeScreen = ({ isLoading }) => (
      <div className="flex-1 flex items-center justify-center flex-col text-center p-4">
         <BotIcon className="w-16 h-16 text-indigo-500 mb-6" />
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent">
-            Chat with Asuras
+            Chat with Asura
         </h1>
         <p className="mt-3 text-base md:text-lg text-gray-500 max-w-xl mx-auto">
             {isLoading ? "Loading history and authenticating..." : "Select a chat from the sidebar or start a new conversation to begin."}

@@ -150,7 +150,7 @@ const WelcomeScreen = ({ isLoading }) => (
      <div className="flex-1 flex items-center justify-center flex-col text-center p-4">
         <BotIcon className="w-16 h-16 text-indigo-500 mb-6" />
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent">
-            Chat with Asura
+            Chat with Asuras
         </h1>
         <p className="mt-3 text-base md:text-lg text-gray-500 max-w-xl mx-auto">
             {isLoading ? "Loading history and authenticating..." : "Select a chat from the sidebar or start a new conversation to begin."}
@@ -158,6 +158,17 @@ const WelcomeScreen = ({ isLoading }) => (
     </div>
 );
 
+const NewChatPlaceholder = () => (
+     <div className="flex-1 flex items-center justify-center flex-col text-center p-4">
+        <BotIcon className="w-16 h-16 text-indigo-500 mb-6" />
+        <h1 className="text-4xl md:text-5xl font-bold text-gray-300">
+            Ask me anything!
+        </h1>
+        <p className="mt-3 text-base md:text-lg text-gray-500 max-w-xl mx-auto">
+            This is the beginning of your new conversation. Send a message to get started.
+        </p>
+    </div>
+);
 
 const TextBox = ({ value, onChange, onSend, disabled }) => (
     <div className="p-4 w-full bg-gray-950">
@@ -389,12 +400,16 @@ export default function Home() {
                 <div className="flex-1 flex flex-col overflow-hidden">
                     {activeChat ? (
                         <>
-                           <ChatWindow 
-                                chat={activeChat}
-                                messagesEndRef={messagesEndRef}
-                                onCopy={handleCopy}
-                                copiedMessageId={copiedMessageId}
-                            />
+                           {activeChat.messages && activeChat.messages.length > 0 ? (
+                               <ChatWindow 
+                                    chat={activeChat}
+                                    messagesEndRef={messagesEndRef}
+                                    onCopy={handleCopy}
+                                    copiedMessageId={copiedMessageId}
+                                />
+                           ) : (
+                                <NewChatPlaceholder />
+                           )}
                             <TextBox 
                                 value={message}
                                 onChange={setMessage}
@@ -418,3 +433,4 @@ export default function Home() {
         </div>
     );
 }
+

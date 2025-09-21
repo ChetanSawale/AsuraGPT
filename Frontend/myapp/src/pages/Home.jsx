@@ -383,7 +383,7 @@ export default function Home() {
                     <div className="flex flex-col items-center justify-end h-full text-center pb-4">
                         <div className="flex-1 flex items-center justify-center flex-col">
                             <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent">
-                                Gemini Chat
+                                Chat with Asura
                             </h1>
                             <p className="mt-3 text-base md:text-lg text-gray-500 max-w-xl mx-auto">
                                 {isLoadingHistory ? "Authenticating..." : "Select a chat or start a new one."}

@@ -388,7 +388,7 @@ export default function Home() {
                 handleLogout={handleLogout}
             />
 
-            <main className="flex-1 flex flex-col relative bg-gray-950">
+            <main className="flex-1 flex flex-col relative bg-zinc-950">
                 <ChatHeader 
                     isSidebarOpen={isSidebarOpen}
                     toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}

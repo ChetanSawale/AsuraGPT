@@ -1,26 +1,30 @@
 const chatModel = require('../models/chat.model');
-const messageModel = require('../models/mesage.model')
+const messageModel = require('../models/message.model');
 
 async function createChat(req, res) {
+    try {
+        const { title } = req.body;
+        const user = req.user;
 
-    const { title} = req.body;
+        const chat = await chatModel.create({
+            user: user._id,
+            title: title || "New Conversation"
+        });
 
-    const user =req.user;
-
-    const chat = await chatModel.create({
-        user: user._id,
-        title
-    });
-
-    res.status(201).json({
-        message: "Chat created successfully",
-        chat: {
-            id: chat._id,
-            title: chat.title,
-            lastActivity: chat.lastActivity,
-            user:chat.user
-        }
-    });
+        res.status(201).json({
+            message: "Chat created successfully",
+            chat: {
+                _id: chat._id,
+                id: chat._id,
+                title: chat.title,
+                lastActivity: chat.lastActivity,
+                user: chat.user
+            }
+        });
+    } catch (error) {
+        console.error("Error creating chat:", error);
+        res.status(500).json({ message: "Failed to create chat" });
+    }
 }
 
 async function getchats(req, res) {
@@ -36,6 +40,7 @@ async function getchats(req, res) {
                 const messages = await messageModel.find({ chat: chat._id }).sort({ createdAt: 1 }); 
                 return {
                     _id: chat._id,
+                    id: chat._id,
                     title: chat.title,
                     lastActivity: chat.lastActivity,
                     user: chat.user,

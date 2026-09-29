@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
-import axios from 'axios';
-
-// --- CONSTANTS ---
-const API_BASE_URL = "https://asuragpt-2.onrender.com";
+import API, { API_BASE_URL } from "../services/api";
 
 // --- HELPER FUNCTIONS ---
 const uuidv4 = () => `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -28,11 +26,11 @@ const CheckIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg
 const LoginPopup = ({ onLoginClick }) => (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
         <div className="bg-zinc-800 p-8 rounded-lg shadow-xl text-center">
-            <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
-            <p className="text-gray-400 mb-6">Please log in to continue to your chat session.</p>
+            <h2 className="text-2xl font-bold mb-4 text-white">Authentication Required</h2>
+            <p className="text-gray-400 mb-6">Please log in to continue your chat session.</p>
             <button
                 onClick={onLoginClick}
-                className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition-colors"
+                className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition-colors text-white"
             >
                 Go to Login
             </button>
@@ -43,8 +41,8 @@ const LoginPopup = ({ onLoginClick }) => (
 const Sidebar = ({ isOpen, chatHistory, activeChatId, setActiveChatId, handleNewChat, isCreatingChat, isLoadingHistory, handleLogout }) => (
     <div className={`bg-black backdrop-blur-md border-r border-gray-800 flex flex-col transition-all duration-300 ${isOpen ? "w-64" : "w-0"} overflow-hidden`}>
         <div className="flex items-center justify-between p-4 border-b border-gray-800 flex-shrink-0">
-            <h2 className="font-semibold whitespace-nowrap">Chat History</h2>
-            <button onClick={handleNewChat} disabled={isCreatingChat} className="p-2 hover:bg-gray-700 rounded-md disabled:opacity-50 disabled:cursor-wait">
+            <h2 className="font-semibold whitespace-nowrap text-white">Chat History</h2>
+            <button onClick={handleNewChat} disabled={isCreatingChat} className="p-2 hover:bg-gray-700 rounded-md disabled:opacity-50 disabled:cursor-wait text-white">
                 {isCreatingChat ? <LoaderIcon className="w-5 h-5" /> : <PlusIcon className="w-5 h-5" />}
             </button>
         </div>
@@ -59,7 +57,7 @@ const Sidebar = ({ isOpen, chatHistory, activeChatId, setActiveChatId, handleNew
                         key={chat.id}
                         onClick={() => setActiveChatId(chat.id)}
                         className={`flex items-center gap-3 p-3 m-2 rounded-md cursor-pointer text-sm transition-colors ${
-                            String(activeChatId) === String(chat.id) ? "bg-indigo-600" : "hover:bg-gray-700"
+                            String(activeChatId) === String(chat.id) ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"
                         }`}
                     >
                         <MessageSquareIcon className="w-4 h-4 flex-shrink-0" />
@@ -72,11 +70,11 @@ const Sidebar = ({ isOpen, chatHistory, activeChatId, setActiveChatId, handleNew
             <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 overflow-hidden">
                      <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-                        <UserIcon className="w-5 h-5" />
+                        <UserIcon className="w-5 h-5 text-white" />
                     </div>
-                    <span className="font-semibold text-sm truncate">User Profile</span>
+                    <span className="font-semibold text-sm truncate text-white">User Profile</span>
                 </div>
-                <button onClick={handleLogout} title="Logout" className="p-2 hover:bg-gray-700 rounded-md flex-shrink-0">
+                <button onClick={handleLogout} title="Logout" className="p-2 hover:bg-gray-700 rounded-md flex-shrink-0 text-white">
                     <LogOutIcon className="w-5 h-5"/>
                 </button>
             </div>
@@ -88,7 +86,7 @@ const ChatHeader = ({ isSidebarOpen, toggleSidebar, handleSummarize, isSummarizi
     <div className="absolute top-0 left-0 right-0 p-4 z-20 flex items-center justify-between">
          <button
             onClick={toggleSidebar}
-            className="p-2 bg-gray-800/50 rounded-md hover:bg-gray-700"
+            className="p-2 bg-gray-800/50 rounded-md hover:bg-gray-700 text-white"
         >
             {isSidebarOpen ? <ChevronLeftIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
         </button>
@@ -96,7 +94,7 @@ const ChatHeader = ({ isSidebarOpen, toggleSidebar, handleSummarize, isSummarizi
              <button
                 onClick={handleSummarize}
                 disabled={isSummarizing}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-800/50 rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 px-3 py-2 bg-gray-800/50 rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white"
                 title="Summarize this conversation"
             >
                 {isSummarizing ? <LoaderIcon className="w-5 h-5" /> : <BookTextIcon className="w-5 h-5" />}
@@ -110,21 +108,21 @@ const MessageBubble = ({ msg, onCopy, copiedMessageId }) => (
      <div className={`group flex items-start gap-3 w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
         {msg.role === "model" && (
             <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center shrink-0">
-                <BotIcon className="w-5 h-5" />
+                <BotIcon className="w-5 h-5 text-white" />
             </div>
         )}
-        <div className={`max-w-xl px-4 py-3 rounded-2xl whitespace-pre-wrap text-sm leading-relaxed relative ${ msg.role === "user" ? "bg-blue-600 rounded-br-none" : "bg-gray-700 rounded-bl-none"}`}>
+        <div className={`max-w-xl px-4 py-3 rounded-2xl whitespace-pre-wrap text-sm leading-relaxed relative ${ msg.role === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-gray-700 text-gray-100 rounded-bl-none"}`}>
             {msg.content}
         </div>
         {msg.role === "user" && (
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
-                <UserIcon className="w-5 h-5" />
+                <UserIcon className="w-5 h-5 text-white" />
             </div>
         )}
          {msg.role === 'model' && (
             <button 
                 onClick={() => onCopy(msg.content, msg.id)}
-                className="p-2 text-gray-500 hover:text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
+                className="p-2 text-gray-400 hover:text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
                 title="Copy message"
             >
                 {copiedMessageId === msg.id ? (
@@ -150,10 +148,10 @@ const WelcomeScreen = ({ isLoading }) => (
      <div className="flex-1 flex items-center justify-center flex-col text-center p-4">
         <BotIcon className="w-16 h-16 text-indigo-500 mb-6" />
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent">
-            Chat with Asuras
+            Chat with AsuraGPT
         </h1>
-        <p className="mt-3 text-base md:text-lg text-gray-500 max-w-xl mx-auto">
-            {isLoading ? "Loading history and authenticating..." : "Select a chat from the sidebar or start a new conversation to begin."}
+        <p className="mt-3 text-base md:text-lg text-gray-400 max-w-xl mx-auto">
+            {isLoading ? "Loading chat history..." : "Select a chat from the sidebar or start a new conversation."}
         </p>
     </div>
 );
@@ -164,7 +162,7 @@ const NewChatPlaceholder = () => (
         <h1 className="text-4xl md:text-5xl font-bold text-gray-300">
             Ask me anything!
         </h1>
-        <p className="mt-3 text-base md:text-lg text-gray-500 max-w-xl mx-auto">
+        <p className="mt-3 text-base md:text-lg text-gray-400 max-w-xl mx-auto">
             This is the beginning of your new conversation. Send a message to get started.
         </p>
     </div>
@@ -175,7 +173,7 @@ const TextBox = ({ value, onChange, onSend, disabled }) => (
         <div className="relative flex items-center bg-zinc-800 border border-gray-700 rounded-xl shadow-lg backdrop-blur-sm p-2 max-w-3xl mx-auto w-full">
             <input
                 type="text"
-                className="flex-1 w-full p-3 pl-4 bg-transparent focus:outline-none text-sm placeholder-gray-500"
+                className="flex-1 w-full p-3 pl-4 bg-transparent focus:outline-none text-sm text-white placeholder-gray-500"
                 placeholder="Ask anything..."
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
@@ -189,7 +187,7 @@ const TextBox = ({ value, onChange, onSend, disabled }) => (
             <button
                 onClick={onSend}
                 disabled={disabled}
-                className="m-1 p-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed transition-all"
+                className="m-1 p-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed transition-all text-white"
             >
                 <SendIcon className="w-5 h-5" />
             </button>
@@ -201,6 +199,7 @@ const TextBox = ({ value, onChange, onSend, disabled }) => (
 // --- MAIN APP COMPONENT ---
 
 export default function Home() {
+    const navigate = useNavigate();
     const [message, setMessage] = useState("");
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [chatHistory, setChatHistory] = useState([]);
@@ -219,10 +218,7 @@ export default function Home() {
         if (isCreatingChat) return;
         setIsCreatingChat(true);
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/chat`, 
-                { title: "New Conversation" },
-                { withCredentials: true } 
-            );
+            const response = await API.post("/api/chat", { title: "New Conversation" });
             const newChat = response.data.chat; 
             const formattedNewChat = { ...newChat, id: newChat._id, messages: [] };
             setChatHistory((prev) => [formattedNewChat, ...prev]);
@@ -242,7 +238,7 @@ export default function Home() {
         const fetchInitialData = async () => {
             setIsLoadingHistory(true);
             try {
-                const response = await axios.get(`${API_BASE_URL}/api/chat`, { withCredentials: true });
+                const response = await API.get("/api/chat");
                 const chatsFromServer = response.data.chats;
                 
                 if (chatsFromServer && chatsFromServer.length > 0) {
@@ -250,12 +246,12 @@ export default function Home() {
                     const formattedHistory = sortedChats.map(chat => ({
                         id: chat._id,
                         title: chat.title,
-                        messages: chat.messages.map(msg => ({...msg, id: msg._id })),
+                        messages: (chat.messages || []).map(msg => ({ ...msg, id: msg._id || uuidv4() })),
                     }));
                     setChatHistory(formattedHistory);
                     setActiveChatId(formattedHistory[0]?.id || null);
                 } else {
-                    await handleNewChat(); // Create a new chat if history is empty
+                    await handleNewChat();
                 }
             } catch (error) {
                 console.error("❌ Error fetching chat history:", error);
@@ -278,7 +274,7 @@ export default function Home() {
         if (showLoginPopup) return;
 
         socketRef.current = io(API_BASE_URL, {
-            transports: ["websocket"],
+            transports: ["websocket", "polling"],
             withCredentials: true,
         });
         const socket = socketRef.current;
@@ -299,7 +295,7 @@ export default function Home() {
         const handleAiSummary = (data) => {
             const chatId = data.chatId || data.chat;
             if (!chatId) return;
-            const summaryContent = `✨ **Summary:** ${data.summary}`;
+            const summaryContent = `✨ **Summary:**\n${data.summary}`;
             setChatHistory(prev => prev.map(chat =>
                 String(chat.id) === String(chatId)
                     ? { ...chat, messages: [...chat.messages, { id: uuidv4(), role: "model", content: summaryContent }] }
@@ -324,8 +320,13 @@ export default function Home() {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [chatHistory, activeChatId]);
 
-    const handleLogout = () => {
-        window.location.href = '/login'; 
+    const handleLogout = async () => {
+        try {
+            await API.post("/api/auth/logout");
+        } catch (e) {
+            console.error("Logout error:", e);
+        }
+        navigate("/login");
     };
 
     const handleCopy = (text, messageId) => {
@@ -375,7 +376,7 @@ export default function Home() {
     return (
         <div className="font-sans antialiased text-white bg-black h-screen w-screen flex overflow-hidden">
             
-            {showLoginPopup && <LoginPopup onLoginClick={() => window.location.href = '/login'} />}
+            {showLoginPopup && <LoginPopup onLoginClick={() => navigate('/login')} />}
 
             <Sidebar 
                 isOpen={isSidebarOpen}
@@ -424,7 +425,7 @@ export default function Home() {
                                 value={message}
                                 onChange={setMessage}
                                 onSend={sendMessage}
-                                disabled={true} // Disable if no active chat
+                                disabled={true}
                             />
                         </>
                     )}

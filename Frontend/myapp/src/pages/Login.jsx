@@ -1,12 +1,11 @@
 import { useState } from "react";
-import axios from 'axios'; // Import axios directly
+import { useNavigate, Link } from "react-router-dom";
+import API from "../services/api";
 
-// --- SVG Icon --- //
 const BotIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg> );
 
 export default function Login() {
-  // Removed useNavigate as it requires a <Router> context which is not available here.
-  // We will use window.location for navigation instead.
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,16 +19,12 @@ export default function Login() {
     setIsLoading(true);
     setError("");
     try {
-      // Use axios directly with the full URL and configuration
-      await axios.post("https://asuragpt-2.onrender.com/api/auth/login", form, {
-          withCredentials: true 
-      });
-      // Use window.location.href for navigation
-      window.location.href = "/"; // go to home after login
+      await API.post("/api/auth/login", form);
+      navigate("/chat");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid credentials. Please try again.");
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -41,7 +36,7 @@ export default function Login() {
                 <BotIcon className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold">Welcome Back</h1>
-            <p className="text-gray-400">Log in to continue your converstions</p>
+            <p className="text-gray-400">Log in to continue your conversations</p>
         </div>
 
         <form
@@ -58,7 +53,7 @@ export default function Login() {
               id="email"
               placeholder="you@example.com"
               onChange={handleChange}
-              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white"
               required
             />
           </div>
@@ -71,7 +66,7 @@ export default function Login() {
               id="password"
               placeholder="••••••••"
               onChange={handleChange}
-              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white"
               required
             />
           </div>
@@ -86,12 +81,12 @@ export default function Login() {
 
           <p className="text-center text-sm text-gray-400 mt-6">
             Don't have an account?{" "}
-            <span 
-              onClick={() => window.location.href = '/register'} 
+            <Link 
+              to="/register" 
               className="font-medium text-indigo-400 hover:text-indigo-300 cursor-pointer"
             >
               Register here
-            </span>
+            </Link>
           </p>
         </form>
       </div>

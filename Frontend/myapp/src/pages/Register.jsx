@@ -1,16 +1,17 @@
 import { useState } from "react";
-import axios from 'axios'; // Import axios directly
+import { useNavigate, Link } from "react-router-dom";
+import API from "../services/api";
 
-// --- SVG Icon --- //
 const BotIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg> );
 
 export default function Register() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     firstname: "",
     lastname: "",
     email: "",
     password: "",
-    confirmPassword: "" // Added for confirmation
+    confirmPassword: ""
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +22,6 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Password confirmation check
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -29,17 +29,15 @@ export default function Register() {
     setIsLoading(true);
     setError("");
     try {
-      await axios.post("https://asuragpt-2.onrender.com/api/auth/register", {
+      await API.post("/api/auth/register", {
         fullname: {
           firstname: form.firstname,
           lastname: form.lastname,
         },
         email: form.email,
         password: form.password,
-      }, {
-        withCredentials: true
       });
-      window.location.href = "/login"; // go to login after success
+      navigate("/chat");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Please try again.");
     } finally {
@@ -73,7 +71,7 @@ export default function Register() {
                 id="firstname"
                 placeholder="John"
                 onChange={handleChange}
-                className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white"
                 required
                 />
             </div>
@@ -85,7 +83,7 @@ export default function Register() {
                 id="lastname"
                 placeholder="Doe"
                 onChange={handleChange}
-                className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white"
                 required
                 />
             </div>
@@ -99,7 +97,7 @@ export default function Register() {
               id="email"
               placeholder="you@example.com"
               onChange={handleChange}
-              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white"
               required
             />
           </div>
@@ -112,7 +110,7 @@ export default function Register() {
               id="password"
               placeholder="••••••••"
               onChange={handleChange}
-              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white"
               required
             />
           </div>
@@ -125,7 +123,7 @@ export default function Register() {
               id="confirmPassword"
               placeholder="••••••••"
               onChange={handleChange}
-              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              className="w-full p-3 bg-zinc-700 border border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-white"
               required
             />
           </div>
@@ -140,12 +138,12 @@ export default function Register() {
 
           <p className="text-center text-sm text-gray-400 mt-6">
             Already have an account?{" "}
-            <span 
-              onClick={() => window.location.href = '/login'} 
+            <Link 
+              to="/login" 
               className="font-medium text-indigo-400 hover:text-indigo-300 cursor-pointer"
             >
               Login here
-            </span>
+            </Link>
           </p>
         </form>
       </div>

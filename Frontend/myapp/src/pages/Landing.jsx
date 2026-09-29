@@ -1,233 +1,239 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 
-// --- SVG ICONS ---
-const BotIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" />
+// Subtle Minimalist SVG Icons
+const ArrowUpRight = (props) => (
+  <svg {...props} width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4.5 11.5L11.5 4.5" />
+    <path d="M5 4.5H11.5V11" />
   </svg>
 );
 
-const SparklesIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" />
-    <path d="M5 3v4" /><path d="M19 17v4" /><path d="M3 5h4" /><path d="M17 19h4" />
-  </svg>
-);
-
-const MemoryIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect width="18" height="18" x="3" y="3" rx="2" />
-    <path d="M7 7h10" /><path d="M7 12h10" /><path d="M7 17h6" />
-  </svg>
-);
-
-const ShieldIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
-  </svg>
-);
-
-const ZapIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-  </svg>
-);
-
-const ArrowRightIcon = (props) => (
-  <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M5 12h14" /><path d="m12 5 7 7-7 7" />
+const SparkleMinimal = (props) => (
+  <svg {...props} width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M8 0L9.8 6.2L16 8L9.8 9.8L8 16L6.2 9.8L0 8L6.2 6.2L8 0Z" />
   </svg>
 );
 
 export default function Landing() {
-  return (
-    <div className="min-h-screen bg-black text-white selection:bg-indigo-500 selection:text-white font-sans overflow-x-hidden">
-      
-      {/* --- NAVBAR --- */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-xl border-b border-zinc-800/80">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-0.5 shadow-lg shadow-indigo-500/20">
-              <div className="w-full h-full bg-black rounded-[10px] flex items-center justify-center">
-                <BotIcon className="w-6 h-6 text-indigo-400" />
-              </div>
-            </div>
-            <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
-              Asura<span className="text-indigo-500">GPT</span>
-            </span>
-          </div>
+  const [activeTab, setActiveTab] = useState("memory");
 
-          <div className="flex items-center gap-4">
+  return (
+    <div className="min-h-screen bg-[#09090b] text-[#ececee] selection:bg-zinc-800 selection:text-white font-sans antialiased relative overflow-hidden">
+      
+      {/* Background Architectural Grid Lines */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181b15_1px,transparent_1px),linear-gradient(to_bottom,#18181b15_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none" />
+
+      {/* --- HEADER --- */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#09090b]/80 backdrop-blur-md border-b border-zinc-800/40">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <div className="w-5 h-5 rounded bg-zinc-100 flex items-center justify-center text-[#09090b] font-mono text-xs font-bold transition-transform group-hover:rotate-6">
+              A
+            </div>
+            <span className="font-semibold tracking-tight text-sm text-zinc-200 group-hover:text-white transition-colors">
+              Asura<span className="text-zinc-400 font-normal">GPT</span>
+            </span>
+          </Link>
+
+          <nav className="hidden md:flex items-center gap-8 text-xs font-medium text-zinc-400">
+            <a href="#features" className="hover:text-zinc-200 transition-colors">Architecture</a>
+            <a href="#memory" className="hover:text-zinc-200 transition-colors">Vector Memory</a>
+            <a href="#models" className="hover:text-zinc-200 transition-colors">Engine</a>
+          </nav>
+
+          <div className="flex items-center gap-3 text-xs font-medium">
             <Link
               to="/login"
-              className="px-5 py-2.5 text-sm font-medium text-zinc-300 hover:text-white transition-colors"
+              className="px-3.5 py-1.5 text-zinc-400 hover:text-zinc-100 transition-colors"
             >
               Sign In
             </Link>
             <Link
               to="/register"
-              className="relative group px-5 py-2.5 text-sm font-semibold rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-400 hover:to-indigo-500 text-white shadow-lg shadow-indigo-500/25 transition-all hover:scale-105 active:scale-95"
+              className="px-4 py-2 rounded-md bg-zinc-100 text-[#09090b] font-medium hover:bg-white transition-all shadow-sm flex items-center gap-1.5"
             >
-              Get Started
+              Open Workspace
+              <ArrowUpRight className="w-3.5 h-3.5 opacity-70" />
             </Link>
           </div>
         </div>
-      </nav>
+      </header>
 
       {/* --- HERO SECTION --- */}
-      <section className="relative pt-36 pb-24 md:pt-48 md:pb-36 overflow-hidden">
-        {/* Ambient Glows */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-indigo-600/20 blur-[130px] pointer-events-none rounded-full" />
-        <div className="absolute top-1/3 left-1/3 w-[400px] h-[300px] bg-cyan-500/15 blur-[120px] pointer-events-none rounded-full" />
-
-        <div className="max-w-5xl mx-auto px-6 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/80 border border-zinc-700/60 backdrop-blur-md mb-8 shadow-inner">
-            <SparklesIcon className="w-4 h-4 text-indigo-400" />
-            <span className="text-xs font-semibold tracking-wide uppercase text-zinc-300">
-              Powered by Multi-Model AI & Pinecone RAG Memory
-            </span>
+      <section className="relative pt-36 pb-20 md:pt-48 md:pb-32 max-w-5xl mx-auto px-6">
+        <div className="space-y-6 max-w-3xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-900/50 text-[11px] font-mono text-zinc-400">
+            <SparkleMinimal className="text-emerald-400" />
+            <span>v2.0 • Persistent RAG Memory Architecture</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight leading-[1.1] mb-8">
-            Conversational Intelligence <br className="hidden md:block" />
-            <span className="bg-gradient-to-r from-indigo-400 via-cyan-300 to-indigo-200 bg-clip-text text-transparent">
-              Reimagined with Memory.
-            </span>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-medium tracking-tight text-zinc-100 leading-[1.08]">
+            Thoughtful dialogue, <br />
+            <span className="text-zinc-400 italic font-serif">backed by memory.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed mb-10">
-            Experience sub-second AI responses, persistent conversation memory, and automated chat summaries. Designed for professionals and creators.
+          <p className="text-base sm:text-lg text-zinc-400 leading-relaxed font-normal max-w-xl">
+            A minimalist conversational interface built with vector indexing, sub-second model cascades, and clean editorial design.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="pt-4 flex flex-wrap items-center gap-4">
             <Link
               to="/chat"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:opacity-95 text-white font-semibold flex items-center justify-center gap-2 shadow-xl shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 text-base"
+              className="px-6 py-3 rounded-lg bg-zinc-100 text-[#09090b] font-medium hover:bg-white transition-all flex items-center gap-2 text-sm shadow-md"
             >
-              Launch AsuraGPT
-              <ArrowRightIcon className="w-5 h-5" />
+              Start Conversation
+              <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link
               to="/login"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-200 font-semibold flex items-center justify-center transition-all hover:scale-105 text-base"
+              className="px-6 py-3 rounded-lg border border-zinc-800 hover:border-zinc-700 bg-zinc-900/30 text-zinc-300 font-medium transition-all text-sm"
             >
-              Sign In to Account
+              Sign In to History
             </Link>
           </div>
         </div>
+      </section>
 
-        {/* --- APP MOCKUP PREVIEW --- */}
-        <div className="max-w-5xl mx-auto px-6 mt-16 relative z-10">
-          <div className="rounded-2xl border border-zinc-800 bg-zinc-950/80 p-4 md:p-6 shadow-2xl shadow-indigo-500/10 backdrop-blur-xl">
-            <div className="flex items-center gap-2 mb-4 px-2">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-green-500/80" />
-              <span className="text-xs text-zinc-500 font-mono ml-2">asuragpt.internal.app</span>
+      {/* --- INTERACTIVE SHOWCASE --- */}
+      <section className="max-w-5xl mx-auto px-6 pb-24">
+        <div className="rounded-xl border border-zinc-800/80 bg-zinc-900/30 overflow-hidden shadow-2xl backdrop-blur-sm">
+          {/* Top Bar */}
+          <div className="px-5 py-3 border-b border-zinc-800/60 bg-zinc-900/50 flex items-center justify-between text-xs font-mono text-zinc-400">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
+              <span>asuragpt.engine / active-session</span>
             </div>
+            <div className="flex items-center gap-4 text-zinc-500">
+              <button
+                onClick={() => setActiveTab("memory")}
+                className={`transition-colors ${activeTab === "memory" ? "text-zinc-200 underline underline-offset-4" : "hover:text-zinc-400"}`}
+              >
+                Vector Context
+              </button>
+              <button
+                onClick={() => setActiveTab("cascade")}
+                className={`transition-colors ${activeTab === "cascade" ? "text-zinc-200 underline underline-offset-4" : "hover:text-zinc-400"}`}
+              >
+                Model Cascade
+              </button>
+            </div>
+          </div>
 
-            <div className="bg-black/90 rounded-xl p-6 border border-zinc-800/80 space-y-4">
-              <div className="flex items-start gap-3 justify-end">
-                <div className="bg-indigo-600 text-white px-4 py-3 rounded-2xl rounded-br-none text-sm max-w-md">
-                  Can you recall our previous project guidelines and summarize key takeaways?
+          {/* Interactive Content Box */}
+          <div className="p-6 md:p-8 space-y-6 font-mono text-xs leading-relaxed">
+            {activeTab === "memory" ? (
+              <div className="space-y-4">
+                <div className="text-zinc-500">// Pinecone Vector Retrieval (768D Embedding)</div>
+                <div className="p-4 rounded-lg bg-zinc-950 border border-zinc-800/60 text-zinc-300 space-y-2">
+                  <div className="text-emerald-400 font-sans font-semibold text-sm">Query Context Matched:</div>
+                  <p className="text-zinc-400 font-sans text-xs">
+                    "User prefers concise executive summaries, dark mode typography, and structural code refactoring over superficial patches."
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <div className="p-3 rounded-lg bg-zinc-800/60 border border-zinc-700/40 text-zinc-200 max-w-lg font-sans text-sm">
+                    How should we structure the architecture documentation?
+                  </div>
+                </div>
+                <div className="flex justify-start">
+                  <div className="p-4 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-300 max-w-xl font-sans text-sm leading-normal">
+                    Based on your workspace preferences, here is a 3-part clean architectural overview...
+                  </div>
                 </div>
               </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="text-zinc-500">// High-Availability Model Cascade Protocol</div>
+                <div className="grid sm:grid-cols-3 gap-3 font-sans">
+                  <div className="p-3 rounded border border-emerald-500/30 bg-emerald-500/5">
+                    <div className="text-xs text-emerald-400 font-mono">Primary</div>
+                    <div className="text-sm font-medium text-zinc-200">Gemini 3.8-Flash</div>
+                    <div className="text-[11px] text-zinc-500 mt-1">Status: Active</div>
+                  </div>
+                  <div className="p-3 rounded border border-zinc-800 bg-zinc-950">
+                    <div className="text-xs text-zinc-500 font-mono">Standby 1</div>
+                    <div className="text-sm font-medium text-zinc-300">Gemini 3.7-Flash</div>
+                    <div className="text-[11px] text-zinc-500 mt-1">Status: Ready</div>
+                  </div>
+                  <div className="p-3 rounded border border-zinc-800 bg-zinc-950">
+                    <div className="text-xs text-zinc-500 font-mono">Standby 2</div>
+                    <div className="text-sm font-medium text-zinc-300">Gemini 3.6-Flash</div>
+                    <div className="text-[11px] text-zinc-500 mt-1">Status: Ready</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
 
-              <div className="flex items-start gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center shrink-0">
-                  <BotIcon className="w-4 h-4 text-white" />
-                </div>
-                <div className="bg-zinc-800 text-zinc-200 px-4 py-3 rounded-2xl rounded-bl-none text-sm max-w-lg leading-relaxed border border-zinc-700/50">
-                  ✨ <strong>RAG Memory Matched:</strong> Using context retrieved from your past conversations:
-                  <ul className="list-disc list-inside mt-2 space-y-1 text-zinc-300">
-                    <li>Maintain strict API validation across endpoints</li>
-                    <li>Ensure 100% uptime with model fallback fallback cascades</li>
-                    <li>Utilize persistent vector storage for seamless retrieval</li>
-                  </ul>
-                </div>
+      {/* --- EDITORIAL PHILOSOPHY --- */}
+      <section id="features" className="py-24 border-t border-zinc-800/50">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid md:grid-cols-12 gap-12 items-start">
+            <div className="md:col-span-4 space-y-3">
+              <span className="text-xs font-mono uppercase tracking-widest text-zinc-500">Design Philosophy</span>
+              <h2 className="text-2xl font-medium text-zinc-100 tracking-tight">
+                Crafted for clarity, stripped of noise.
+              </h2>
+            </div>
+            <div className="md:col-span-8 grid sm:grid-cols-2 gap-8 text-sm text-zinc-400 font-normal leading-relaxed">
+              <div>
+                <h3 className="text-zinc-200 font-medium mb-2 text-base">Persistent Context</h3>
+                <p>
+                  Every session indexes conversations in real-time. Return days later and pick up right where your thoughts left off.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-zinc-200 font-medium mb-2 text-base">Resilient Engine</h3>
+                <p>
+                  Automatic failover cascades prevent 503 capacity errors, keeping your workflow uninterrupted during peak AI traffic.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-zinc-200 font-medium mb-2 text-base">Instant Summaries</h3>
+                <p>
+                  Condense complex technical discussions into concise, actionable takeaways with a single click.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-zinc-200 font-medium mb-2 text-base">Private & Direct</h3>
+                <p>
+                  HTTP-only cookie auth and end-to-end token verification protect your conversation data from unauthenticated access.
+                </p>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* --- FEATURES GRID --- */}
-      <section className="py-24 bg-zinc-950/60 border-t border-b border-zinc-900 relative">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4">
-              Engineered for Speed & Precision
-            </h2>
-            <p className="text-zinc-400 text-lg max-w-2xl mx-auto">
-              Built on modern fullstack architecture with intelligent vector retrieval and instant Socket streaming.
-            </p>
+      {/* --- CTA / FOOTER --- */}
+      <footer className="py-20 border-t border-zinc-800/40 bg-zinc-950/40">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div>
+            <h3 className="text-xl font-medium text-zinc-100 tracking-tight">Experience AsuraGPT today.</h3>
+            <p className="text-xs text-zinc-500 mt-1">No setup required. Jump straight into conversation.</p>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-indigo-500/50 transition-all hover:scale-[1.02]">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-6">
-                <MemoryIcon className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Long-Term RAG Memory</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                Integrated Pinecone vector index ensures AsuraGPT remembers past interactions across sessions.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-indigo-500/50 transition-all hover:scale-[1.02]">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 mb-6">
-                <ZapIcon className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Multi-Model Fallback Cascade</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                Zero downtime with automatic model failovers across Gemini 3.8-flash, 3.7-flash, and 3.6-flash.
-              </p>
-            </div>
-
-            <div className="p-8 rounded-2xl bg-zinc-900/40 border border-zinc-800/80 hover:border-indigo-500/50 transition-all hover:scale-[1.02]">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-6">
-                <ShieldIcon className="w-6 h-6" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Secure & Private</h3>
-              <p className="text-zinc-400 text-sm leading-relaxed">
-                HTTP-only cookie authentication, JWT token verification, and password encryption out of the box.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* --- CTA SECTION --- */}
-      <section className="py-24 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <div className="p-12 rounded-3xl bg-gradient-to-b from-zinc-900 to-black border border-zinc-800 relative shadow-2xl">
-            <div className="absolute inset-0 bg-indigo-600/10 blur-3xl rounded-3xl pointer-events-none" />
-            <h2 className="text-3xl md:text-5xl font-extrabold mb-6 relative z-10">
-              Ready to Upgrade Your AI Experience?
-            </h2>
-            <p className="text-zinc-400 text-lg mb-8 max-w-xl mx-auto relative z-10">
-              Start chatting immediately with intelligent RAG memory and real-time streaming.
-            </p>
+          <div className="flex items-center gap-4">
             <Link
               to="/register"
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-105 active:scale-95 relative z-10"
+              className="px-5 py-2.5 rounded-md bg-zinc-100 text-[#09090b] font-medium text-xs hover:bg-white transition-all shadow-sm"
             >
-              Create Free Account
-              <ArrowRightIcon className="w-5 h-5" />
+              Get Started Free
+            </Link>
+            <Link
+              to="/chat"
+              className="px-5 py-2.5 rounded-md border border-zinc-800 text-zinc-300 font-medium text-xs hover:border-zinc-700 transition-all"
+            >
+              Launch Chat
             </Link>
           </div>
         </div>
-      </section>
 
-      {/* --- FOOTER --- */}
-      <footer className="py-8 border-t border-zinc-800/80 text-center text-zinc-500 text-sm">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <BotIcon className="w-5 h-5 text-indigo-500" />
-            <span className="font-bold text-zinc-300">AsuraGPT</span>
-          </div>
-          <p>© {new Date().getFullYear()} AsuraGPT. All rights reserved.</p>
+        <div className="max-w-5xl mx-auto px-6 mt-16 pt-8 border-t border-zinc-900 flex items-center justify-between text-xs text-zinc-600 font-mono">
+          <span>© {new Date().getFullYear()} AsuraGPT</span>
+          <span>Crafted with Precision</span>
         </div>
       </footer>
     </div>

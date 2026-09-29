@@ -1,437 +1,510 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { io } from "socket.io-client";
 import API, { API_BASE_URL } from "../services/api";
 
 // --- HELPER FUNCTIONS ---
 const uuidv4 = () => `id-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
-// --- SVG ICONS ---
-const SendIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <line x1="22" y1="2" x2="11" y2="13"></line> <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon> </svg> );
-const PlusIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <line x1="12" y1="5" x2="12" y2="19"></line> <line x1="5" y1="12" x2="19" y2="12"></line> </svg> );
-const BotIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" /><path d="M2 14h2" /><path d="M20 14h2" /><path d="M15 13v2" /><path d="M9 13v2" /></svg> );
-const UserIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path> <circle cx="12" cy="7" r="4"></circle> </svg> );
-const MenuIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <line x1="4" x2="20" y1="12" y2="12" /> <line x1="4" x2="20" y1="6" y2="6" /> <line x1="4" x2="20" y1="18" y2="18" /> </svg> );
-const MessageSquareIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path> </svg> );
-const BookTextIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"> <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path> <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path> </svg> );
-const LoaderIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin"> <path d="M21 12a9 9 0 1 1-6.219-8.56" /> </svg> );
-const ChevronLeftIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg> );
-const LogOutIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> );
-const CopyIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> );
-const CheckIcon = (props) => ( <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> );
+// --- MINIMAL SVG ICONS ---
+const ArrowUpIcon = (props) => (
+  <svg {...props} width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 13V3" /><path d="M3 8l5-5 5 5" />
+  </svg>
+);
+
+const PlusIcon = (props) => (
+  <svg {...props} width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M8 3v10M3 8h10" />
+  </svg>
+);
+
+const SparkleIcon = (props) => (
+  <svg {...props} width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M8 0L9.8 6.2L16 8L9.8 9.8L8 16L6.2 9.8L0 8L6.2 6.2L8 0Z" />
+  </svg>
+);
+
+const MessageSquareIcon = (props) => (
+  <svg {...props} width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 10.5a2 2 0 0 1-2 2H5.5L2 15V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v6.5z" />
+  </svg>
+);
+
+const BookTextIcon = (props) => (
+  <svg {...props} width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M2.5 13.5A2.5 2.5 0 0 1 5 11h8.5" />
+    <path d="M5 2.5h8.5v11H5A2.5 2.5 0 0 1 2.5 11v-6A2.5 2.5 0 0 1 5 2.5z" />
+  </svg>
+);
+
+const LoaderIcon = (props) => (
+  <svg {...props} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>
+);
+
+const SidebarToggleIcon = (props) => (
+  <svg {...props} width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="13.5" height="12" x="1.25" y="2" rx="2" />
+    <path d="M5.5 2v12" />
+  </svg>
+);
+
+const LogOutIcon = (props) => (
+  <svg {...props} width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M6 14H3.5A1.5 1.5 0 0 1 2 12.5v-9A1.5 1.5 0 0 1 3.5 2H6" />
+    <path d="M10.5 11.5L14 8l-3.5-3.5" />
+    <path d="M14 8H6" />
+  </svg>
+);
+
+const CopyIcon = (props) => (
+  <svg {...props} width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect width="9" height="9" x="5" y="5" rx="1.5" />
+    <path d="M3 11V3.5A1.5 1.5 0 0 1 4.5 2H11" />
+  </svg>
+);
+
+const CheckIcon = (props) => (
+  <svg {...props} width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="13.5 4.5 6.5 11.5 2.5 7.5" />
+  </svg>
+);
 
 
 // --- CHILD COMPONENTS ---
 
 const LoginPopup = ({ onLoginClick }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-        <div className="bg-zinc-800 p-8 rounded-lg shadow-xl text-center">
-            <h2 className="text-2xl font-bold mb-4 text-white">Authentication Required</h2>
-            <p className="text-gray-400 mb-6">Please log in to continue your chat session.</p>
-            <button
-                onClick={onLoginClick}
-                className="w-full px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold transition-colors text-white"
-            >
-                Go to Login
-            </button>
-        </div>
+  <div className="fixed inset-0 bg-[#09090b]/90 backdrop-blur-md flex items-center justify-center z-50 p-6">
+    <div className="bg-zinc-950 border border-zinc-800 p-8 rounded-xl shadow-2xl max-w-sm w-full text-center space-y-4">
+      <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto text-zinc-300">
+        <SparkleIcon className="text-emerald-400" />
+      </div>
+      <h2 className="text-xl font-medium tracking-tight text-zinc-100">Session Required</h2>
+      <p className="text-xs text-zinc-400 leading-relaxed">Please sign in to access workspace history and real-time streaming.</p>
+      <button
+        onClick={onLoginClick}
+        className="w-full py-2.5 bg-zinc-100 text-[#09090b] hover:bg-white rounded-lg font-medium text-xs transition-all shadow-sm"
+      >
+        Sign In to Continue
+      </button>
     </div>
+  </div>
 );
 
 const Sidebar = ({ isOpen, chatHistory, activeChatId, setActiveChatId, handleNewChat, isCreatingChat, isLoadingHistory, handleLogout }) => (
-    <div className={`bg-black backdrop-blur-md border-r border-gray-800 flex flex-col transition-all duration-300 ${isOpen ? "w-64" : "w-0"} overflow-hidden`}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-800 flex-shrink-0">
-            <h2 className="font-semibold whitespace-nowrap text-white">Chat History</h2>
-            <button onClick={handleNewChat} disabled={isCreatingChat} className="p-2 hover:bg-gray-700 rounded-md disabled:opacity-50 disabled:cursor-wait text-white">
-                {isCreatingChat ? <LoaderIcon className="w-5 h-5" /> : <PlusIcon className="w-5 h-5" />}
-            </button>
+  <aside className={`bg-[#09090b] border-r border-zinc-800/60 flex flex-col transition-all duration-300 ${isOpen ? "w-64" : "w-0"} overflow-hidden shrink-0`}>
+    <div className="flex items-center justify-between p-4 border-b border-zinc-800/60 shrink-0">
+      <Link to="/" className="flex items-center gap-2 group">
+        <div className="w-4 h-4 rounded bg-zinc-100 flex items-center justify-center text-[#09090b] font-mono text-[10px] font-bold">
+          A
         </div>
-        <div className="flex-1 overflow-y-auto">
-            {isLoadingHistory ? (
-                <div className="flex justify-center items-center h-full">
-                    <LoaderIcon className="w-6 h-6 text-indigo-500" />
-                </div>
-            ) : (
-                chatHistory.map((chat) => (
-                    <div
-                        key={chat.id}
-                        onClick={() => setActiveChatId(chat.id)}
-                        className={`flex items-center gap-3 p-3 m-2 rounded-md cursor-pointer text-sm transition-colors ${
-                            String(activeChatId) === String(chat.id) ? "bg-indigo-600 text-white" : "hover:bg-gray-700 text-gray-300"
-                        }`}
-                    >
-                        <MessageSquareIcon className="w-4 h-4 flex-shrink-0" />
-                        <span className="flex-1 truncate">{chat.title}</span>
-                    </div>
-                ))
-            )}
-        </div>
-        <div className="p-4 border-t border-gray-800 flex-shrink-0">
-            <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 overflow-hidden">
-                     <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center flex-shrink-0">
-                        <UserIcon className="w-5 h-5 text-white" />
-                    </div>
-                    <span className="font-semibold text-sm truncate text-white">User Profile</span>
-                </div>
-                <button onClick={handleLogout} title="Logout" className="p-2 hover:bg-gray-700 rounded-md flex-shrink-0 text-white">
-                    <LogOutIcon className="w-5 h-5"/>
-                </button>
-            </div>
-        </div>
+        <span className="font-semibold text-xs tracking-tight text-zinc-200">AsuraGPT</span>
+      </Link>
+      <button
+        onClick={handleNewChat}
+        disabled={isCreatingChat}
+        title="New Chat"
+        className="p-1.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-md transition-colors disabled:opacity-50"
+      >
+        {isCreatingChat ? <LoaderIcon className="w-4 h-4" /> : <PlusIcon className="w-4 h-4" />}
+      </button>
     </div>
+
+    <div className="flex-1 overflow-y-auto p-2 space-y-1">
+      <div className="px-2 py-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-500">
+        Conversations
+      </div>
+      {isLoadingHistory ? (
+        <div className="flex justify-center items-center py-8">
+          <LoaderIcon className="w-4 h-4 text-zinc-500" />
+        </div>
+      ) : (
+        chatHistory.map((chat) => (
+          <div
+            key={chat.id}
+            onClick={() => setActiveChatId(chat.id)}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg cursor-pointer text-xs transition-all ${
+              String(activeChatId) === String(chat.id)
+                ? "bg-zinc-800/80 text-zinc-100 font-medium"
+                : "text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200"
+            }`}
+          >
+            <MessageSquareIcon className="shrink-0 opacity-70" />
+            <span className="truncate">{chat.title || "New Conversation"}</span>
+          </div>
+        ))
+      )}
+    </div>
+
+    <div className="p-3 border-t border-zinc-800/60 shrink-0">
+      <div className="flex items-center justify-between gap-2 px-2 py-1">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <div className="w-6 h-6 rounded bg-zinc-800 border border-zinc-700/50 flex items-center justify-center text-[10px] font-mono text-zinc-300">
+            U
+          </div>
+          <span className="text-xs text-zinc-300 truncate">Workspace User</span>
+        </div>
+        <button
+          onClick={handleLogout}
+          title="Sign Out"
+          className="p-1.5 hover:bg-zinc-800 text-zinc-500 hover:text-zinc-200 rounded-md transition-colors"
+        >
+          <LogOutIcon />
+        </button>
+      </div>
+    </div>
+  </aside>
 );
 
 const ChatHeader = ({ isSidebarOpen, toggleSidebar, handleSummarize, isSummarizing, hasActiveMessages }) => (
-    <div className="absolute top-0 left-0 right-0 p-4 z-20 flex items-center justify-between">
-         <button
-            onClick={toggleSidebar}
-            className="p-2 bg-gray-800/50 rounded-md hover:bg-gray-700 text-white"
-        >
-            {isSidebarOpen ? <ChevronLeftIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
-        </button>
-        {hasActiveMessages && (
-             <button
-                onClick={handleSummarize}
-                disabled={isSummarizing}
-                className="flex items-center gap-2 px-3 py-2 bg-gray-800/50 rounded-md hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white"
-                title="Summarize this conversation"
-            >
-                {isSummarizing ? <LoaderIcon className="w-5 h-5" /> : <BookTextIcon className="w-5 h-5" />}
-                <span className="hidden sm:inline text-sm">Summarize</span>
-            </button>
-        )}
+  <header className="h-14 border-b border-zinc-800/60 bg-[#09090b]/80 backdrop-blur-md px-4 flex items-center justify-between shrink-0 z-20">
+    <div className="flex items-center gap-3">
+      <button
+        onClick={toggleSidebar}
+        className="p-1.5 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-100 rounded-md transition-colors"
+        title="Toggle Sidebar"
+      >
+        <SidebarToggleIcon />
+      </button>
+      <span className="text-xs font-mono text-zinc-500">asuragpt / active-session</span>
     </div>
+
+    {hasActiveMessages && (
+      <button
+        onClick={handleSummarize}
+        disabled={isSummarizing}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-zinc-800 hover:border-zinc-700 bg-zinc-900/50 text-zinc-300 text-xs font-medium transition-all disabled:opacity-50"
+        title="Summarize conversation"
+      >
+        {isSummarizing ? <LoaderIcon className="w-3.5 h-3.5" /> : <BookTextIcon />}
+        <span>Summarize</span>
+      </button>
+    )}
+  </header>
 );
 
 const MessageBubble = ({ msg, onCopy, copiedMessageId }) => (
-     <div className={`group flex items-start gap-3 w-full ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-        {msg.role === "model" && (
-            <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center shrink-0">
-                <BotIcon className="w-5 h-5 text-white" />
-            </div>
-        )}
-        <div className={`max-w-xl px-4 py-3 rounded-2xl whitespace-pre-wrap text-sm leading-relaxed relative ${ msg.role === "user" ? "bg-blue-600 text-white rounded-br-none" : "bg-gray-700 text-gray-100 rounded-bl-none"}`}>
-            {msg.content}
-        </div>
-        {msg.role === "user" && (
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shrink-0">
-                <UserIcon className="w-5 h-5 text-white" />
-            </div>
-        )}
-         {msg.role === 'model' && (
-            <button 
-                onClick={() => onCopy(msg.content, msg.id)}
-                className="p-2 text-gray-400 hover:text-white rounded-md opacity-0 group-hover:opacity-100 transition-opacity"
-                title="Copy message"
-            >
-                {copiedMessageId === msg.id ? (
-                    <CheckIcon className="w-4 h-4 text-green-500" />
-                ) : (
-                    <CopyIcon className="w-4 h-4" />
-                )}
-            </button>
-        )}
+  <div className={`group flex flex-col w-full space-y-1 ${msg.role === "user" ? "items-end" : "items-start"}`}>
+    <div className="flex items-center gap-2 text-[10px] font-mono text-zinc-500 px-1">
+      <span>{msg.role === "user" ? "You" : "AsuraGPT"}</span>
     </div>
+    
+    <div className="relative max-w-2xl">
+      <div
+        className={`px-4 py-3 rounded-xl text-xs md:text-sm leading-relaxed ${
+          msg.role === "user"
+            ? "bg-zinc-100 text-[#09090b] font-medium rounded-tr-none shadow-sm"
+            : "bg-zinc-900/90 border border-zinc-800/80 text-zinc-200 rounded-tl-none whitespace-pre-wrap"
+        }`}
+      >
+        {msg.content}
+      </div>
+
+      {msg.role === "model" && (
+        <button
+          onClick={() => onCopy(msg.content, msg.id)}
+          className="absolute -right-8 top-2 p-1 text-zinc-500 hover:text-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity"
+          title="Copy response"
+        >
+          {copiedMessageId === msg.id ? <CheckIcon className="text-emerald-400" /> : <CopyIcon />}
+        </button>
+      )}
+    </div>
+  </div>
 );
 
 const ChatWindow = ({ chat, messagesEndRef, onCopy, copiedMessageId }) => (
-    <div className="flex-1 overflow-y-auto p-6 space-y-6 pt-20">
-        {chat.messages && chat.messages.map((msg) => (
-            <MessageBubble key={msg.id} msg={msg} onCopy={onCopy} copiedMessageId={copiedMessageId} />
-        ))}
-        <div ref={messagesEndRef} />
-    </div>
+  <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 max-w-4xl mx-auto w-full">
+    {chat.messages && chat.messages.map((msg) => (
+      <MessageBubble key={msg.id} msg={msg} onCopy={onCopy} copiedMessageId={copiedMessageId} />
+    ))}
+    <div ref={messagesEndRef} />
+  </div>
 );
 
 const WelcomeScreen = ({ isLoading }) => (
-     <div className="flex-1 flex items-center justify-center flex-col text-center p-4">
-        <BotIcon className="w-16 h-16 text-indigo-500 mb-6" />
-        <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gray-200 via-gray-400 to-gray-600 bg-clip-text text-transparent">
-            Chat with AsuraGPT
-        </h1>
-        <p className="mt-3 text-base md:text-lg text-gray-400 max-w-xl mx-auto">
-            {isLoading ? "Loading chat history..." : "Select a chat from the sidebar or start a new conversation."}
-        </p>
+  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto space-y-4">
+    <div className="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-200">
+      <SparkleIcon className="text-emerald-400" />
     </div>
+    <h1 className="text-2xl font-medium tracking-tight text-zinc-100">
+      Start a Thoughtful Conversation
+    </h1>
+    <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+      {isLoading ? "Retrieving workspace state..." : "Type your query below. All sessions index memory seamlessly."}
+    </p>
+  </div>
 );
 
 const NewChatPlaceholder = () => (
-     <div className="flex-1 flex items-center justify-center flex-col text-center p-4">
-        <BotIcon className="w-16 h-16 text-indigo-500 mb-6" />
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-300">
-            Ask me anything!
-        </h1>
-        <p className="mt-3 text-base md:text-lg text-gray-400 max-w-xl mx-auto">
-            This is the beginning of your new conversation. Send a message to get started.
-        </p>
+  <div className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto space-y-3">
+    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-400">
+      <SparkleIcon className="w-4 h-4 text-emerald-400" />
     </div>
+    <h2 className="text-lg font-medium text-zinc-200 tracking-tight">New Session Started</h2>
+    <p className="text-xs text-zinc-500 font-mono">Send your first message to begin indexing context.</p>
+  </div>
 );
 
 const TextBox = ({ value, onChange, onSend, disabled }) => (
-    <div className="p-4 w-full bg-gray-950">
-        <div className="relative flex items-center bg-zinc-800 border border-gray-700 rounded-xl shadow-lg backdrop-blur-sm p-2 max-w-3xl mx-auto w-full">
-            <input
-                type="text"
-                className="flex-1 w-full p-3 pl-4 bg-transparent focus:outline-none text-sm text-white placeholder-gray-500"
-                placeholder="Ask anything..."
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        if (!disabled) onSend();
-                    }
-                }}
-            />
-            <button
-                onClick={onSend}
-                disabled={disabled}
-                className="m-1 p-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed transition-all text-white"
-            >
-                <SendIcon className="w-5 h-5" />
-            </button>
-        </div>
+  <div className="p-4 bg-[#09090b] border-t border-zinc-800/60 shrink-0">
+    <div className="max-w-3xl mx-auto relative flex items-center bg-zinc-950 border border-zinc-800 focus-within:border-zinc-600 rounded-xl transition-all shadow-lg p-1.5">
+      <input
+        type="text"
+        className="flex-1 bg-transparent px-3 py-2 text-xs md:text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none"
+        placeholder="Type a message or ask a question..."
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            if (!disabled) onSend();
+          }
+        }}
+      />
+      <button
+        onClick={onSend}
+        disabled={disabled}
+        className="p-2.5 rounded-lg bg-zinc-100 text-[#09090b] hover:bg-white disabled:bg-zinc-800 disabled:text-zinc-600 disabled:cursor-not-allowed transition-all"
+      >
+        <ArrowUpIcon />
+      </button>
     </div>
+  </div>
 );
 
 
-// --- MAIN APP COMPONENT ---
+// --- MAIN WORKSPACE COMPONENT ---
 
 export default function Home() {
-    const navigate = useNavigate();
-    const [message, setMessage] = useState("");
-    const [isSidebarOpen, setSidebarOpen] = useState(true);
-    const [chatHistory, setChatHistory] = useState([]);
-    const [activeChatId, setActiveChatId] = useState(null);
-    const [isSummarizing, setIsSummarizing] = useState(false);
-    const [isLoadingHistory, setIsLoadingHistory] = useState(true); 
-    const [isCreatingChat, setIsCreatingChat] = useState(false); 
-    const [copiedMessageId, setCopiedMessageId] = useState(null);
-    const [showLoginPopup, setShowLoginPopup] = useState(false);
+  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [chatHistory, setChatHistory] = useState([]);
+  const [activeChatId, setActiveChatId] = useState(null);
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
+  const [copiedMessageId, setCopiedMessageId] = useState(null);
+  const [showLoginPopup, setShowLoginPopup] = useState(false);
 
-    const messagesEndRef = useRef(null);
-    const socketRef = useRef(null);
-    const initialLoadHandled = useRef(false);
+  const messagesEndRef = useRef(null);
+  const socketRef = useRef(null);
+  const initialLoadHandled = useRef(false);
 
-    const handleNewChat = useCallback(async () => {
-        if (isCreatingChat) return;
-        setIsCreatingChat(true);
-        try {
-            const response = await API.post("/api/chat", { title: "New Conversation" });
-            const newChat = response.data.chat; 
-            const formattedNewChat = { ...newChat, id: newChat._id, messages: [] };
-            setChatHistory((prev) => [formattedNewChat, ...prev]);
-            setActiveChatId(formattedNewChat.id);
-        } catch (error) {
-            console.error("❌ Error creating new chat:", error);
-            if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                 setShowLoginPopup(true);
-            }
-        } finally {
-            setIsCreatingChat(false);
+  const handleNewChat = useCallback(async () => {
+    if (isCreatingChat) return;
+    setIsCreatingChat(true);
+    try {
+      const response = await API.post("/api/chat", { title: "New Conversation" });
+      const newChat = response.data.chat;
+      const formattedNewChat = { ...newChat, id: newChat._id, messages: [] };
+      setChatHistory((prev) => [formattedNewChat, ...prev]);
+      setActiveChatId(formattedNewChat.id);
+    } catch (error) {
+      console.error("❌ Error creating new chat:", error);
+      if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        setShowLoginPopup(true);
+      }
+    } finally {
+      setIsCreatingChat(false);
+    }
+  }, [isCreatingChat]);
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      setIsLoadingHistory(true);
+      try {
+        const response = await API.get("/api/chat");
+        const chatsFromServer = response.data.chats;
+
+        if (chatsFromServer && chatsFromServer.length > 0) {
+          const sortedChats = chatsFromServer.sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
+          const formattedHistory = sortedChats.map(chat => ({
+            id: chat._id,
+            title: chat.title,
+            messages: (chat.messages || []).map(msg => ({ ...msg, id: msg._id || uuidv4() })),
+          }));
+          setChatHistory(formattedHistory);
+          setActiveChatId(formattedHistory[0]?.id || null);
+        } else {
+          await handleNewChat();
         }
-    }, [isCreatingChat]);
-
-    // Effect for initial data fetching
-    useEffect(() => {
-        const fetchInitialData = async () => {
-            setIsLoadingHistory(true);
-            try {
-                const response = await API.get("/api/chat");
-                const chatsFromServer = response.data.chats;
-                
-                if (chatsFromServer && chatsFromServer.length > 0) {
-                    const sortedChats = chatsFromServer.sort((a, b) => new Date(b.lastActivity) - new Date(a.lastActivity));
-                    const formattedHistory = sortedChats.map(chat => ({
-                        id: chat._id,
-                        title: chat.title,
-                        messages: (chat.messages || []).map(msg => ({ ...msg, id: msg._id || uuidv4() })),
-                    }));
-                    setChatHistory(formattedHistory);
-                    setActiveChatId(formattedHistory[0]?.id || null);
-                } else {
-                    await handleNewChat();
-                }
-            } catch (error) {
-                console.error("❌ Error fetching chat history:", error);
-                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-                    setShowLoginPopup(true);
-                }
-            } finally {
-                setIsLoadingHistory(false);
-            }
-        };
-        
-        if (!initialLoadHandled.current) {
-            fetchInitialData();
-            initialLoadHandled.current = true;
+      } catch (error) {
+        console.error("❌ Error fetching chat history:", error);
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+          setShowLoginPopup(true);
         }
-    }, [handleNewChat]); 
-
-    // Effect for managing Socket.IO connection
-    useEffect(() => {
-        if (showLoginPopup) return;
-
-        socketRef.current = io(API_BASE_URL, {
-            transports: ["websocket", "polling"],
-            withCredentials: true,
-        });
-        const socket = socketRef.current;
-        socket.on("connect", () => console.log("✅ Socket connected:", socket.id));
-        
-        const handleAiMessage = (data) => {
-            const chatId = data.chatId || data.chat; 
-            if (!chatId) return;
-            setChatHistory(prev => prev.map(chat => {
-                if (String(chat.id) !== String(chatId)) return chat;
-                const existingMessages = chat.messages || [];
-                const newMessage = { id: uuidv4(), role: "model", content: data.content };
-                return { ...chat, messages: [...existingMessages, newMessage] };
-            }));
-        };
-        socket.on("ai-message", handleAiMessage);
-        
-        const handleAiSummary = (data) => {
-            const chatId = data.chatId || data.chat;
-            if (!chatId) return;
-            const summaryContent = `✨ **Summary:**\n${data.summary}`;
-            setChatHistory(prev => prev.map(chat =>
-                String(chat.id) === String(chatId)
-                    ? { ...chat, messages: [...chat.messages, { id: uuidv4(), role: "model", content: summaryContent }] }
-                    : chat
-            ));
-            setIsSummarizing(false);
-        };
-        socket.on("ai-summary", handleAiSummary);
-        socket.on("disconnect", () => console.log("⚠️ Socket disconnected"));
-
-        return () => {
-            if (socket) {
-                socket.off("ai-message", handleAiMessage);
-                socket.off("ai-summary", handleAiSummary);
-                socket.disconnect();
-            }
-        };
-    }, [showLoginPopup]);
-
-    // Effect for auto-scrolling
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [chatHistory, activeChatId]);
-
-    const handleLogout = async () => {
-        try {
-            await API.post("/api/auth/logout");
-        } catch (e) {
-            console.error("Logout error:", e);
-        }
-        navigate("/login");
+      } finally {
+        setIsLoadingHistory(false);
+      }
     };
 
-    const handleCopy = (text, messageId) => {
-        navigator.clipboard.writeText(text).then(() => {
-            setCopiedMessageId(messageId);
-            setTimeout(() => setCopiedMessageId(null), 2000);
-        }).catch(err => {
-            console.error('Failed to copy text: ', err);
-        });
+    if (!initialLoadHandled.current) {
+      fetchInitialData();
+      initialLoadHandled.current = true;
+    }
+  }, [handleNewChat]);
+
+  useEffect(() => {
+    if (showLoginPopup) return;
+
+    socketRef.current = io(API_BASE_URL, {
+      transports: ["websocket", "polling"],
+      withCredentials: true,
+    });
+    const socket = socketRef.current;
+
+    const handleAiMessage = (data) => {
+      const chatId = data.chatId || data.chat;
+      if (!chatId) return;
+      setChatHistory(prev => prev.map(chat => {
+        if (String(chat.id) !== String(chatId)) return chat;
+        const existingMessages = chat.messages || [];
+        const newMessage = { id: uuidv4(), role: "model", content: data.content };
+        return { ...chat, messages: [...existingMessages, newMessage] };
+      }));
     };
+    socket.on("ai-message", handleAiMessage);
 
-    const sendMessage = async () => {
-        if (!message.trim() || !socketRef.current || !activeChatId) return;
-
-        const userMessage = { id: uuidv4(), role: "user", content: message };
-        
-        const currentChat = chatHistory.find(c => String(c.id) === String(activeChatId));
-        const historyForSocket = currentChat?.messages || [];
-
-        setChatHistory(prev =>
-            prev.map(chat =>
-                String(chat.id) === String(activeChatId)
-                    ? { ...chat, messages: [...chat.messages, userMessage] }
-                    : chat
-            )
-        );
-        
-        socketRef.current.emit("ai-message", {
-            content: message,
-            chat: activeChatId,
-            history: [...historyForSocket, userMessage],
-        });
-        setMessage("");
+    const handleAiSummary = (data) => {
+      const chatId = data.chatId || data.chat;
+      if (!chatId) return;
+      const summaryContent = `✨ **Summary:**\n${data.summary}`;
+      setChatHistory(prev => prev.map(chat =>
+        String(chat.id) === String(chatId)
+          ? { ...chat, messages: [...chat.messages, { id: uuidv4(), role: "model", content: summaryContent }] }
+          : chat
+      ));
+      setIsSummarizing(false);
     };
+    socket.on("ai-summary", handleAiSummary);
 
-    const activeChat = chatHistory.find((chat) => String(chat.id) === String(activeChatId));
-
-    const handleSummarize = () => {
-        if (!activeChat || activeChat.messages.length < 2 || isSummarizing) return;
-        setIsSummarizing(true);
-        socketRef.current.emit("summarize-chat", {
-            messages: activeChat.messages,
-            chat: activeChatId,
-        });
+    return () => {
+      if (socket) {
+        socket.off("ai-message", handleAiMessage);
+        socket.off("ai-summary", handleAiSummary);
+        socket.disconnect();
+      }
     };
-    
-    return (
-        <div className="font-sans antialiased text-white bg-black h-screen w-screen flex overflow-hidden">
-            
-            {showLoginPopup && <LoginPopup onLoginClick={() => navigate('/login')} />}
+  }, [showLoginPopup]);
 
-            <Sidebar 
-                isOpen={isSidebarOpen}
-                chatHistory={chatHistory}
-                activeChatId={activeChatId}
-                setActiveChatId={setActiveChatId}
-                handleNewChat={handleNewChat}
-                isCreatingChat={isCreatingChat}
-                isLoadingHistory={isLoadingHistory}
-                handleLogout={handleLogout}
-            />
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatHistory, activeChatId]);
 
-            <main className="flex-1 flex flex-col relative bg-zinc-950">
-                <ChatHeader 
-                    isSidebarOpen={isSidebarOpen}
-                    toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
-                    handleSummarize={handleSummarize}
-                    isSummarizing={isSummarizing}
-                    hasActiveMessages={activeChat && activeChat.messages.length >= 2}
-                />
-                
-                <div className="flex-1 flex flex-col overflow-hidden">
-                    {activeChat ? (
-                        <>
-                           {activeChat.messages && activeChat.messages.length > 0 ? (
-                               <ChatWindow 
-                                    chat={activeChat}
-                                    messagesEndRef={messagesEndRef}
-                                    onCopy={handleCopy}
-                                    copiedMessageId={copiedMessageId}
-                                />
-                           ) : (
-                                <NewChatPlaceholder />
-                           )}
-                            <TextBox 
-                                value={message}
-                                onChange={setMessage}
-                                onSend={sendMessage}
-                                disabled={!message.trim()}
-                            />
-                        </>
-                    ) : (
-                        <>
-                            <WelcomeScreen isLoading={isLoadingHistory} />
-                            <TextBox 
-                                value={message}
-                                onChange={setMessage}
-                                onSend={sendMessage}
-                                disabled={true}
-                            />
-                        </>
-                    )}
-                </div>
-            </main>
-        </div>
+  const handleLogout = async () => {
+    try {
+      await API.post("/api/auth/logout");
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
+    navigate("/login");
+  };
+
+  const handleCopy = (text, messageId) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedMessageId(messageId);
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    });
+  };
+
+  const sendMessage = async () => {
+    if (!message.trim() || !socketRef.current || !activeChatId) return;
+
+    const userMessage = { id: uuidv4(), role: "user", content: message };
+    const currentChat = chatHistory.find(c => String(c.id) === String(activeChatId));
+    const historyForSocket = currentChat?.messages || [];
+
+    setChatHistory(prev =>
+      prev.map(chat =>
+        String(chat.id) === String(activeChatId)
+          ? { ...chat, messages: [...chat.messages, userMessage] }
+          : chat
+      )
     );
-}
 
+    socketRef.current.emit("ai-message", {
+      content: message,
+      chat: activeChatId,
+      history: [...historyForSocket, userMessage],
+    });
+    setMessage("");
+  };
+
+  const activeChat = chatHistory.find((chat) => String(chat.id) === String(activeChatId));
+
+  const handleSummarize = () => {
+    if (!activeChat || activeChat.messages.length < 2 || isSummarizing) return;
+    setIsSummarizing(true);
+    socketRef.current.emit("summarize-chat", {
+      messages: activeChat.messages,
+      chat: activeChatId,
+    });
+  };
+
+  return (
+    <div className="font-sans antialiased text-[#ececee] bg-[#09090b] h-screen w-screen flex overflow-hidden selection:bg-zinc-800 selection:text-white">
+      {showLoginPopup && <LoginPopup onLoginClick={() => navigate("/login")} />}
+
+      <Sidebar
+        isOpen={isSidebarOpen}
+        chatHistory={chatHistory}
+        activeChatId={activeChatId}
+        setActiveChatId={setActiveChatId}
+        handleNewChat={handleNewChat}
+        isCreatingChat={isCreatingChat}
+        isLoadingHistory={isLoadingHistory}
+        handleLogout={handleLogout}
+      />
+
+      <main className="flex-1 flex flex-col relative bg-[#09090b]">
+        <ChatHeader
+          isSidebarOpen={isSidebarOpen}
+          toggleSidebar={() => setSidebarOpen(!isSidebarOpen)}
+          handleSummarize={handleSummarize}
+          isSummarizing={isSummarizing}
+          hasActiveMessages={activeChat && activeChat.messages.length >= 2}
+        />
+
+        <div className="flex-1 flex flex-col overflow-hidden relative">
+          {/* Background Architectural Grid Lines */}
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#18181b10_1px,transparent_1px),linear-gradient(to_bottom,#18181b10_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
+
+          {activeChat ? (
+            <>
+              {activeChat.messages && activeChat.messages.length > 0 ? (
+                <ChatWindow
+                  chat={activeChat}
+                  messagesEndRef={messagesEndRef}
+                  onCopy={handleCopy}
+                  copiedMessageId={copiedMessageId}
+                />
+              ) : (
+                <NewChatPlaceholder />
+              )}
+              <TextBox
+                value={message}
+                onChange={setMessage}
+                onSend={sendMessage}
+                disabled={!message.trim()}
+              />
+            </>
+          ) : (
+            <>
+              <WelcomeScreen isLoading={isLoadingHistory} />
+              <TextBox
+                value={message}
+                onChange={setMessage}
+                onSend={sendMessage}
+                disabled={true}
+              />
+            </>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}

@@ -2,33 +2,47 @@ const userModel = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true';
+
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
 async function registerUser(req, res) {
     try {
-        const { fullname, email, password } = req.body;
+        const { fullname, firstname, lastname, email, password } = req.body;
 
-        if (!email || !password || !fullname || !fullname.firstname) {
-            return res.status(400).json({ message: "Firstname, email, and password are required" });
+        let finalFirstname = firstname;
+        let finalLastname = lastname || "";
+
+        if (fullname && typeof fullname === 'object') {
+            finalFirstname = fullname.firstname || finalFirstname;
+            finalLastname = fullname.lastname || finalLastname;
+        } else if (fullname && typeof fullname === 'string') {
+            const parts = fullname.trim().split(' ');
+            finalFirstname = parts[0];
+            finalLastname = parts.slice(1).join(' ') || "";
         }
 
-        const existingUser = await userModel.findOne({ email });
+        if (!email || !password || !finalFirstname) {
+            return res.status(400).json({ message: "First name, email, and password are required" });
+        }
+
+        const existingUser = await userModel.findOne({ email: email.toLowerCase().trim() });
         if (existingUser) {
-            return res.status(400).json({ message: "User already exists" });
+            return res.status(400).json({ message: "User already exists with this email" });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = await userModel.create({
-            email,
+            email: email.toLowerCase().trim(),
             fullname: {
-                firstname: fullname.firstname,
-                lastname: fullname.lastname || ""
+                firstname: finalFirstname,
+                lastname: finalLastname
             },
             password: hashedPassword
         });
@@ -47,8 +61,8 @@ async function registerUser(req, res) {
             }
         });
     } catch (error) {
-        console.error("Error in registerUser:", error);
-        return res.status(500).json({ message: "Server error during registration" });
+        console.error("❌ Error in registerUser:", error);
+        return res.status(500).json({ message: error.message || "Server error during registration" });
     }
 }
 
@@ -60,7 +74,7 @@ async function loginuser(req, res) {
             return res.status(400).json({ message: "Email and password are required" });
         }
 
-        const user = await userModel.findOne({ email });
+        const user = await userModel.findOne({ email: email.toLowerCase().trim() });
         if (!user) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
@@ -84,13 +98,13 @@ async function loginuser(req, res) {
             },
         });
     } catch (error) {
-        console.error("Error in loginuser:", error);
+        console.error("❌ Error in loginuser:", error);
         return res.status(500).json({ message: "Server error during login" });
     }
 }
 
 async function logoutuser(req, res) {
-    res.clearCookie("token");
+    res.clearCookie("token", cookieOptions);
     return res.status(200).json({ message: "Logged out successfully" });
 }
 

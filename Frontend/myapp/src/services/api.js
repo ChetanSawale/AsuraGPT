@@ -10,4 +10,16 @@ const API = axios.create({
     }
 });
 
+// Attach JWT token from localStorage as Authorization header fallback for cross-origin deployments
+API.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('asura_token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 export default API;

@@ -24,7 +24,10 @@ export default function Login() {
     setIsLoading(true);
     setError("");
     try {
-      await API.post("/api/auth/login", form);
+      const response = await API.post("/api/auth/login", form);
+      if (response.data?.token) {
+        localStorage.setItem("asura_token", response.data.token);
+      }
       navigate("/chat");
     } catch (err) {
       setError(err.response?.data?.message || "Invalid credentials. Please try again.");

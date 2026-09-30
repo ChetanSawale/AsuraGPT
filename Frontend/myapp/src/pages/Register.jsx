@@ -34,7 +34,7 @@ export default function Register() {
     setIsLoading(true);
     setError("");
     try {
-      await API.post("/api/auth/register", {
+      const response = await API.post("/api/auth/register", {
         fullname: {
           firstname: form.firstname,
           lastname: form.lastname,
@@ -42,6 +42,9 @@ export default function Register() {
         email: form.email,
         password: form.password,
       });
+      if (response.data?.token) {
+        localStorage.setItem("asura_token", response.data.token);
+      }
       navigate("/chat");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed. Please try again.");
